@@ -1,0 +1,197 @@
+ tm = coverageInfo.total_metric
+        tm.reverse()
+        flip = False
+        
+        for i in tm:
+            if i < len (irList):
+                if isinstance(irList[i][0],kachuaAST.ConditionCommand):
+                    if flip:
+                        break
+                    flip = True
+                    if i in CustomMutator.mcond_list:
+                        continue
+                    CustomMutator.mcond_list.append(i)
+                    x = input_data.data[str(irList[i][0].cond.lexpr)]    
+                    y = irList[i][0].cond.rexpr.val
+                    if type(irList[i][0].cond) is  LT or GT:
+                        if x < y:
+                            x = y + randint(0,100) 
+                        else:
+                            x = y - randint(1,y)
+                    elif type(irList[i][0].cond) == LTE or GTE:
+                        if x <= y:
+                            x = y + randint(1,100) 
+                        else:
+                            x = y - randint(0,y)
+                    elif type(irList[i][0].cond) == EQ or NEQ:
+                        if x == y:
+                            x = y + randint(1,100) 
+                        else:
+                            x = y 
+                    else:
+                        flip = False
+                    input_data.data[str(irList[i][0].cond.lexpr)] = x
+       
+
+
+from pickle import TRUE
+from random import randint
+from re import X
+from matplotlib.pyplot import flag
+
+from numpy import append, true_divide
+from kast.kachuaAST import *
+from kast import kachuaAST
+import sys
+from z3 import *
+sys.path.insert(0, "KachuaCore/interfaces/")
+from interfaces.fuzzerInterface import *
+sys.path.insert(0, '../KachuaCore/')
+
+# Each input is of this type.
+#class InputObject():
+#    def __init__(self, data):
+#        self.id = str(uuid.uuid4())
+#        self.data = data
+#        # Flag to check if ever picked
+#        # for mutation or not.
+#        self.pickedOnce = False
+       
+class CustomCoverageMetric(CoverageMetricBase):
+    # Statements covered is used for
+    # coverage information.
+    def __init__(self):
+        super().__init__()
+
+    # TODO : Implement this
+    def compareCoverage(self, curr_metric, total_metric):
+        # must compare curr_metric and total_metric
+        # True if Improved Coverage else False
+        for i in curr_metric:
+            if i not in total_metric:
+                return True
+        return False
+
+    # TODO : Implement this
+    def updateTotalCoverage(self, curr_metric, total_metric):
+        # Compute the total_metric coverage and return it (list)
+        # this changes if new coverage is seen for a
+        # given input.
+        for i in curr_metric:
+            if i not in total_metric:
+                total_metric.append(i)
+        return total_metric
+
+class CustomMutator(MutatorBase):
+    def __init__(self):
+        pass
+    mcond_list = []    
+    # TODO : Implement this
+    def mutate(self, input_data, coverageInfo, irList):
+        # Mutate the input data and return it
+        # coverageInfo is of type CoverageMetricBase
+        # Don't mutate coverageInfo
+        # irList : List of IR Statments (Don't Modify)
+        # input_data.data -> type dict() with {key : variable(str), value : int}
+        # must return input_data after mutation.
+
+        ########  My code STARTS here  #######
+        #input_data.pickedOnce = True
+
+        ########  My code ENDS here  #######
+        return input_data
+
+
+# Reuse code and imports from
+# earlier submissions (if any).
+
+
+
+
+
+        flp = False
+        for j in coverageInfo.total_metric[::-1]:
+            if j >= len(irList):
+                continue
+            if j in CustomMutator.mcond_list:
+                continue
+            CustomMutator.mcond_list.append(j)
+            i = irList[j]
+            if isinstance(i[0],kachuaAST.ConditionCommand):
+                print(type(i[0].cond))
+                print("************")
+                if type(i[0].cond) ==BoolFalse:
+                    continue
+                if flp == True:
+                    break
+                
+                if type(i[0].cond.rexpr) == Num:
+                    flp = True 
+                    if type(i[0].cond) == LT:
+                        if  input_data.data[str(i[0].cond.lexpr)] < i[0].cond.rexpr.val:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val + randint(1,100)
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val - randint(1,i[0].cond.rexpr.val)  
+                    elif type(i[0].cond) == GT:
+                        if  input_data.data[str(i[0].cond.lexpr)] > i[0].cond.rexpr.val:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val - randint(1,i[0].cond.rexpr.val)
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val + randint(1,100)  
+                    elif type(i[0].cond) == LTE:
+                        if  input_data.data[str(i[0].cond.lexpr)] <= i[0].cond.rexpr.val:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val + randint(1,100)
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val - randint(0,i[0].cond.rexpr.val)  
+                    elif type(i[0].cond) == GTE:
+                        if  input_data.data[str(i[0].cond.lexpr)] >= i[0].cond.rexpr.val:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val - randint(1,i[0].cond.rexpr.val) 
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val + randint(0,100) 
+                    elif type(i[0].cond) == EQ:
+                        if  input_data.data[str(i[0].cond.lexpr)] == i[0].cond.rexpr.val:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val + randint(-i[0].cond.rexpr.val,100)
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val 
+                    elif type(i[0].cond) == NEQ:
+                        if  input_data.data[str(i[0].cond.lexpr)] != i[0].cond.rexpr.val:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val 
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = i[0].cond.rexpr.val + randint(-i[0].cond.rexpr.val,100) 
+                    else:
+                        flp = False
+                else:
+                    if type(i[0].cond) == LT:
+                        flp = True 
+                        if  input_data.data[str(i[0].cond.lexpr)] < input_data.data[str(i[0].cond.rexpr)]:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] + randint(1,100)
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] - randint(1,input_data.data[str(i[0].cond.rexpr)])  
+                    elif type(i[0].cond) == GT:
+                        if  input_data.data[str(i[0].cond.lexpr)] > input_data.data[str(i[0].cond.rexpr)]:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] - randint(1,input_data.data[str(i[0].cond.rexpr)])
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] + randint(1,100)  
+                    elif type(i[0].cond) == LTE:
+                        if  input_data.data[str(i[0].cond.lexpr)] <= input_data.data[str(i[0].cond.rexpr)]:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] + randint(1,100)
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] - randint(0,input_data.data[str(i[0].cond.rexpr)])  
+                    elif type(i[0].cond) == GTE:
+                        if  input_data.data[str(i[0].cond.lexpr)] >= input_data.data[str(i[0].cond.rexpr)]:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] - randint(1,input_data.data[str(i[0].cond.rexpr)]) 
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] + randint(0,100) 
+                    elif type(i[0].cond) == EQ:
+                        if  input_data.data[str(i[0].cond.lexpr)] == input_data.data[str(i[0].cond.rexpr)]:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] + randint(-input_data.data[str(i[0].cond.rexpr)],100)
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] 
+                    elif type(i[0].cond) == NEQ:
+                        if  input_data.data[str(i[0].cond.lexpr)] != input_data.data[str(i[0].cond.rexpr)]:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] 
+                        else:
+                            input_data.data[str(i[0].cond.lexpr)] = input_data.data[str(i[0].cond.rexpr)] + randint(-input_data.data[str(i[0].cond.rexpr)],100) 
+                    else:
+                        flp = False
+
+
